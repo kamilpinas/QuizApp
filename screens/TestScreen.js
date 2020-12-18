@@ -2,14 +2,12 @@ import {Button, Image, SafeAreaView, Text, TouchableOpacity, View} from 'react-n
 import React, {useState, useEffect} from 'react';
 import styles from '../styles';
 import CountDown from 'react-native-countdown-component';
-import test1 from '../tests/test1';
 
 
-export const scoreBoard = [];
 export let playerScore = 0;
 
 function TestScreen({route, navigation}) {
-    const {name, test, qnumber} = route.params;
+    const {id, quizContent: quizContent, qnumber, lastquestion} = route.params;
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -19,20 +17,29 @@ function TestScreen({route, navigation}) {
                                style={styles.imageStyle}/></TouchableOpacity>
                 </View>
                 <View style={[{flex: 13, alignItems: 'center'}]}>
-                    <Text style={styles.headerText}>{name}</Text>
+                    <Text style={styles.headerText}>{quizContent.name}</Text>
                 </View>
             </View>
             <View style={styles.content}>
-                {test.length > qnumber ? RenderQuestion(navigation, test, qnumber, name) : RenderFinalScore(navigation, name)}
-
+                {lastquestion > qnumber ? RenderQuestion(navigation, quizContent, qnumber) : RenderFinalScore(navigation, quizContent.name, quizContent.tasks.length)}
             </View>
         </SafeAreaView>
     );
 }
 
-function RenderQuestion(navigation, test, qnumber, testname) {
+function RenderQuestion(navigation, quizContent, qnumber) {
     const [key,setKey] = useState(0);
-    let time = test[qnumber].duration;
+    const [running, setRunning] = useState(true);
+
+    useEffect(() => {
+        setRunning(true);
+        return () => {
+            setRunning(false);
+        };
+    }, []);
+    let question = quizContent.tasks[qnumber];
+    let time = quizContent.tasks[qnumber].duration;
+
     return (
         <View style={[{flex: 1}]}>
             <View style={[{
@@ -41,102 +48,84 @@ function RenderQuestion(navigation, test, qnumber, testname) {
                 flexDirection: 'row',
                 alignItems: 'center',
             }]}>
-                <Text style={[{flex: 1, marginStart: 30}]}>Question {qnumber + 1} of {test.length}</Text>
+                <Text style={[{flex: 1, marginStart: 30}]}>Question {qnumber + 1} of {quizContent.tasks.length}</Text>
                 <View style={[{paddingTop:20,paddingRight:10}]}>
                     <CountDown
                         key={key}
                         until={time}
                         size={30}
-                        onFinish={() => alert('Czas minął')}
+                        onFinish={() => {
+                            setKey(prevKey => prevKey + 1);
+                            NextQuestion(navigation, quizContent, qnumber);
+                        }}
                         digitStyle={{backgroundColor: '#FFB3B0'}}
                         digitTxtStyle={{fontSize:30}}
                         timeToShow={[ 'S']}
+                        running={running}
                     />
                 </View>
             </View>
             <View style={[{flex: 1, justifyContent: 'center', marginStart: 40, marginEnd: 70}]}>
-                <Text style={{alignSelf: 'center'}}>{test[qnumber].question}</Text>
+                <Text style={{alignSelf: 'center'}}>{quizContent.tasks[qnumber].question}</Text>
             </View>
             <View style={{flex: 3}}>
                 <View style={styles.answersBox}>
                     <View style={styles.answersRow}>
-                        <View>
-                            <Button title={test[qnumber].answers[0].content} style={styles.answers}
-                                    onPress={() => {
-                                        if (test[qnumber].answers[0].isCorrect) {
-                                            playerScore++;
-                                        }
-                                        console.log(playerScore);
-                                        NextQuestion(navigation, testname, qnumber);
-                                        setKey(prevKey => prevKey + 1)
-                                    }}></Button>
-                        </View>
-                        <View style={[{marginTop: 7}]}>
-                            <Button title={test[qnumber].answers[1].content}
-                                    style={styles.answers}
-                                    onPress={() => {
-                                        if (test[qnumber].answers[1].isCorrect) {
-                                            playerScore++;
-                                        }
-                                        NextQuestion(navigation, testname, qnumber);
-                                        setKey(prevKey => prevKey + 1)
-                                    }}></Button>
-                        </View>
+                        {question.answers.map((el) => (
+                                <View style={{marginTop: 15}}>
+                                    <Button title={el.content} style={styles.answers}
+                                            onPress={() => {
+                                                if (el.isCorrect) {
+                                                    console.log('poprawna');
+                                                    playerScore++;
+                                                }
+                                                NextQuestion(navigation, quizContent, qnumber);
+                                                setKey(prevKey => prevKey + 1);
+
+                                            }}></Button>
+                                </View>
+                            ),
+                        )}
                     </View>
-                    <View style={styles.answersRow}>
-                        <View>
-                            <Button title={test[qnumber].answers[2].content} style={styles.answers}
-                                    onPress={() => {
-                                        if (test[qnumber].answers[2].isCorrect) {
-                                            playerScore++;
-                                        }
-                                        NextQuestion(navigation, testname, qnumber);
-                                        setKey(prevKey => prevKey + 1)
-                                    }}></Button>
-                        </View>
-                        <View style={[{marginTop: 7}]}>
-                            <Button title={test[qnumber].answers[3].content} style={styles.answers}
-                                    onPress={() => {
-                                        if (test[qnumber].answers[3].isCorrect) {
-                                            playerScore++;
-                                        }
-                                        NextQuestion(navigation, testname, qnumber);
-                                        setKey(prevKey => prevKey + 1)
-                                    }}></Button>
-                        </View></View>
                 </View>
             </View>
-            <View style={{flex: 8}}></View>
         </View>
     );
 }
 
 
 
-function NextQuestion(navigation, testName, questionNumber) {
-    if (questionNumber - 1 < test1.length) {
-        navigation.navigate(testName, {
-            name: testName,
-            question: test1[questionNumber + 1],
+function NextQuestion(navigation, QuizContent, questionNumber) {
+    if (questionNumber - 1 < QuizContent.tasks.length) {
+        navigation.navigate(QuizContent.id, {
+            id: QuizContent.id,
             qnumber: questionNumber + 1,
+            lastquestion: QuizContent.tasks.length,
         });
     }
 }
 
-function RenderFinalScore(navigation, testName) {
-    scoreBoard.push({
-        'nick': 'nicko',
-        'date': new Date().toISOString().slice(0, 10),
-        'score': playerScore,
-        'total': test1.length,
-        'type': testName,
-    });
-    playerScore = 0;
+function RenderFinalScore(navigation, testName,numberOfQuestions) {
+    fetch('http://tgryl.pl/quiz/'+ 'result',{
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(
+            {
+                nick: "bibi",
+                score: playerScore,
+                total: numberOfQuestions,
+                type: testName,
+            }
+        )
+    })
     return (
         <View style={[{flex: 1, alignItems: 'center'}]}>
             <Text style={styles.resultText}>{'Nazwa: ' + testName}</Text>
-            <Text style={styles.resultText}>{'Uzyskany wynik: ' + scoreBoard[scoreBoard.length - 1].score}</Text>
-            <Text style={styles.resultText}>{'Możliwa liczba punktow: ' + test1.length}</Text>
+            <Text style={styles.resultText}>{'Uzyskany wynik: ' + playerScore}</Text>
+            <Text style={styles.resultText}>{'Możliwa liczba punktow: ' + numberOfQuestions}</Text>
             <Text style={styles.resultText}>{'Data: ' + new Date().toISOString().slice(0, 10)}</Text>
             <View style={[{marginTop: 40},{width:'100%'},{padding:5}]}>
                 <Button title={'ranking'} onPress={() => navigation.navigate('Rank')}></Button>

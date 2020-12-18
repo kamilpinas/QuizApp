@@ -11,19 +11,21 @@ export default {
     item: {
         backgroundColor: '#B0FFD9',
         borderWidth: 3,
+        borderRadius:5,
         borderColor:'#87E0B5',
         padding: 10,
         margin:10,
     },
     title: {
         fontSize: 28,
+        fontFamily:'FredokaOne-Regular',
         textAlign:'center',
     },
     tags:{
         color:'blue',
         textAlign:'center',
         textDecorationLine: 'underline',
-        margin:3
+        margin:5
     },
     drawerElement:{
         marginTop: 20,
@@ -31,6 +33,7 @@ export default {
         padding: 15,
         borderColor: 'black',
         borderRadius:6,
+        textAlign:'center',
     },
     footerText:{
         textAlign:'center',

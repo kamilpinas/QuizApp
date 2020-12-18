@@ -2,15 +2,30 @@ import {FlatList, Image, RefreshControl, SafeAreaView, Text, TouchableOpacity, V
 import styles from '../styles';
 import React, {useState, useEffect} from 'react';
 
-import{scoreBoard} from './TestScreen';
 
 function RankScreen({navigation}) {
     const [refreshing, setRefreshing] = useState(false);
+    const [rankScore, setRankScore] = useState([]);
+
+    useEffect(() => {
+        fetch('http://tgryl.pl/quiz/' + 'results')
+            .then((response) => response.json())
+            .then((json) => setRankScore(json.reverse()))
+            .catch((error) => console.error(error));
+
+        return () => {
+        };
+    }, []);
 
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
-
-        wait(100).then(() => setRefreshing(false));
+        wait(100).then(() => {
+            fetch('http://tgryl.pl/quiz/' + 'results')
+                .then((response) => response.json())
+                .then((json) => setRankScore(json.reverse()))
+                .catch((error) => console.error(error));
+            setRefreshing(false);
+        });
     }, []);
 
     return (
@@ -46,7 +61,7 @@ function RankScreen({navigation}) {
                             style={[styles.centerMode, styles.border, {width: 100, backgroundColor: '#BCE0AA'}]}><Text
                             style={styles.font22}>Data</Text></TouchableOpacity>
                     </View>
-                    {createScoreBoard(scoreBoard)}
+                    {createResults(rankScore)}
                 </SafeAreaView>
             </View>
         </SafeAreaView>
@@ -59,7 +74,7 @@ const wait = (timeout) => {
     });
 };
 
-function createScoreBoard() {
+function createResults(data) {
     const renderItem = ({item,index}) => (
         <View style={[{flex: 1}]}>
             <View style={{flexDirection: 'row'}}>
@@ -73,7 +88,7 @@ function createScoreBoard() {
     return (
         <SafeAreaView>
             <FlatList
-                data={scoreBoard}
+                data={data}
                 renderItem={renderItem}
                 keyExtractor={(item, index) => index.toString()}
             />
