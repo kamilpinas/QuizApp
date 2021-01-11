@@ -1,13 +1,15 @@
-import {Button, Image, SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
+import {Button, Image, SafeAreaView, Text, ToastAndroid, TouchableOpacity, View} from 'react-native';
 import React, {useState, useEffect} from 'react';
 import styles from '../styles';
 import CountDown from 'react-native-countdown-component';
+import NetInfo from '@react-native-community/netinfo';
 
+const _ = require('lodash');
 
 export let playerScore = 0;
 
-function TestScreen({route, navigation}) {
-    const {id, quizContent: quizContent, qnumber, lastquestion} = route.params;
+function TestScreen({navigation, route}) {
+    const {id, quizContent, qnumber, lastquestion} = route.params;
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -28,7 +30,7 @@ function TestScreen({route, navigation}) {
 }
 
 function RenderQuestion(navigation, quizContent, qnumber) {
-    const [key,setKey] = useState(0);
+    const [key, setKey] = useState(0);
     const [running, setRunning] = useState(true);
 
     useEffect(() => {
@@ -49,7 +51,7 @@ function RenderQuestion(navigation, quizContent, qnumber) {
                 alignItems: 'center',
             }]}>
                 <Text style={[{flex: 1, marginStart: 30}]}>Question {qnumber + 1} of {quizContent.tasks.length}</Text>
-                <View style={[{paddingTop:20,paddingRight:10}]}>
+                <View style={[{paddingTop: 20, paddingRight: 10}]}>
                     <CountDown
                         key={key}
                         until={time}
@@ -59,8 +61,8 @@ function RenderQuestion(navigation, quizContent, qnumber) {
                             NextQuestion(navigation, quizContent, qnumber);
                         }}
                         digitStyle={{backgroundColor: '#FFB3B0'}}
-                        digitTxtStyle={{fontSize:30}}
-                        timeToShow={[ 'S']}
+                        digitTxtStyle={{fontSize: 30}}
+                        timeToShow={['S']}
                         running={running}
                     />
                 </View>
@@ -94,7 +96,6 @@ function RenderQuestion(navigation, quizContent, qnumber) {
 }
 
 
-
 function NextQuestion(navigation, QuizContent, questionNumber) {
     if (questionNumber - 1 < QuizContent.tasks.length) {
         navigation.navigate(QuizContent.id, {
@@ -105,33 +106,40 @@ function NextQuestion(navigation, QuizContent, questionNumber) {
     }
 }
 
-function RenderFinalScore(navigation, testName,numberOfQuestions) {
-    fetch('http://tgryl.pl/quiz/'+ 'result',{
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(
-            {
-                nick: "bibi",
-                score: playerScore,
-                total: numberOfQuestions,
-                type: testName,
-            }
-        )
-    })
+function RenderFinalScore(navigation, testName, numberOfQuestions) {
+    NetInfo.fetch().then(state => {
+        if (state.isConnected == true) {
+            fetch('http://tgryl.pl/quiz/' + 'result', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(
+                    {
+                        nick: 'bibi',
+                        score: playerScore,
+                        total: numberOfQuestions,
+                        type: testName,
+                    },
+                ),
+            });
+        } else {
+            ToastAndroid.showWithGravity('No network!', ToastAndroid.SHORT, ToastAndroid.TOP);
+        }
+    });
     return (
         <View style={[{flex: 1, alignItems: 'center'}]}>
-            <Text style={styles.resultText}>{'Nazwa: ' + testName}</Text>
-            <Text style={styles.resultText}>{'Uzyskany wynik: ' + playerScore}</Text>
-            <Text style={styles.resultText}>{'Możliwa liczba punktow: ' + numberOfQuestions}</Text>
-            <Text style={styles.resultText}>{'Data: ' + new Date().toISOString().slice(0, 10)}</Text>
-            <View style={[{marginTop: 40},{width:'100%'},{padding:5}]}>
+            <Text style={[{marginTop: 4}]}>{'Nazwa: ' + testName}</Text>
+            <Text style={[{marginTop: 4}]}>{'Uzyskany wynik: ' + playerScore}</Text>
+            <Text style={[{marginTop: 4}]}>{'Możliwa liczba punktow: ' + numberOfQuestions}</Text>
+            <Text style={[{marginTop: 4}]}>{'Data: ' + new Date().toISOString().slice(0, 10)}</Text>
+            <View style={[{marginTop: 10}]}>
                 <Button title={'ranking'} onPress={() => navigation.navigate('Rank')}></Button>
             </View>
 
         </View>
     );
 }
+
 export default TestScreen;

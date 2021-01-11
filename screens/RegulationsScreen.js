@@ -40,16 +40,21 @@ function RegulationsScreen({navigation}) {
 
     return (
         <View style={[{alignItems: 'center', margin: 30}]}>
-            <Text style={[{fontSize: 30,textAlign:'center', fontWeight: 'bold'}]}>Regulamin</Text>
-            <Text style={[{fontSize: 12, marginTop: 20,marginBottom:50}]}>Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+            <Text style={[{fontSize: 30, textAlign: 'center', fontWeight: 'bold'}]}>Regulamin</Text>
+            <Text style={[{fontSize: 12, marginTop: 20, marginBottom: 50}]}>Lorem ipsum dolor sit amet, consectetur
+                adipiscing elit,
                 sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Lorem ipsum dolor sit amet,
+                consectetur adipiscing elit,
                 sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Lorem ipsum dolor sit amet,
+                consectetur adipiscing elit,
                 sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Lorem ipsum dolor sit amet,
+                consectetur adipiscing elit,
                 sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Lorem ipsum dolor sit amet,
+                consectetur adipiscing elit,
                 sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
                 exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat </Text>
             <Button title={'Akceptuj'} onPress={() => {
@@ -60,4 +65,5 @@ function RegulationsScreen({navigation}) {
     );
 
 }
+
 export default RegulationsScreen;

@@ -28,10 +28,20 @@ export default {
         margin:5
     },
     drawerElement:{
-        marginTop: 20,
+        marginTop: 15,
         borderWidth:2,
-        padding: 15,
+        padding: 10,
         borderColor: 'black',
+        borderRadius:6,
+        textAlign:'center',
+    },
+    drawerElement2:{
+        marginTop: 15,
+        borderWidth:2,
+        padding: 10,
+        fontWeight:'bold',
+        borderColor: 'black',
+        backgroundColor:'#75fffa',
         borderRadius:6,
         textAlign:'center',
     },

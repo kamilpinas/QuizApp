@@ -1,26 +1,28 @@
 import {Button, FlatList, Image, SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
 import styles from '../styles';
 import React,{Component} from 'react';
-const baseURL = 'http://tgryl.pl/quiz/';
+
+import NetInfo from '@react-native-community/netinfo';
+const _ = require('lodash');
+
+let netStat;
+const isOnline = NetInfo.addEventListener(state => {
+    netStat = state.isConnected;
+});
+
+
 class HomeScreen extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
             testsData: [],
+            aTag: [],
         };
-    }
-    componentDidMount() {
-        fetch('http://tgryl.pl/quiz/' + 'tests')
-            .then((response) => response.json())
-            .then((json) => {
-                this.setState({testsData: json});
-            })
-            .catch((error) => console.error(error));
     }
 
     async getQuiz(id) {
-        return await fetch(baseURL + 'test/' + id)
+        return await fetch('http://tgryl.pl/quiz/' + 'test/' + id)
             .then((response) => response.json())
             .then((json) => {
                 return json;
@@ -31,11 +33,66 @@ class HomeScreen extends Component {
     async goQuiz(navigation, item) {
         playerScore = 0;
         const quizContent = await this.getQuiz(item.id);
+        quizContent.tasks = _.shuffle(quizContent.tasks);
         navigation.navigate(item.id, {
             id: item.id,
             quizContent: quizContent,
             qnumber: 0,
             lastquestion: item.numberOfTasks,
+        });
+
+    }
+    async getFromDb(database) {
+        let query = 'SELECT * FROM tags;';
+        let table = [];
+        database.transaction(tx => {
+            tx.executeSql(query, [], (tx, results) => {
+                let len = results.rows.length;
+                if (len > 0) {
+                    for (let i = 0; i < results.rows.length; i++) {
+                        table.push(results.rows.item(i));
+                    }
+                    this.setState({aTag: table});
+                }
+            });
+        });
+
+        let tags = this.state.aTag;
+        query = 'SELECT * FROM tests;';
+        let table2 = [];
+        database.transaction(tx => {
+            tx.executeSql(query, [], (tx, results) => {
+                let len = results.rows.length;
+                if (len > 0) {
+                    for (let i = 0; i < results.rows.length; i++) {
+                        table2.push(results.rows.item(i));
+                        let idtag = table2[i].id;
+                        table2[i].aTag = [];
+                        aTag.forEach((item, z) => {
+                            if (item.id_tag === idtag) {
+                                table2[i].aTag.push(item.tag);
+                            }
+                        });
+                    }
+                    allTestsData = table;
+                    this.setState({testsData: table});
+                }
+            });
+        });
+    }
+    componentDidMount() {
+        NetInfo.fetch().then(state => {
+            if (state.isConnected == true) {
+                fetch('http://tgryl.pl/quiz/' + 'tests')
+                    .then((response) => response.json())
+                    .then((json) => {
+                        this.setState({testsData: _.shuffle(json)});
+                    })
+                    .catch((error) => console.error('error 3 ' + error));
+            } else {
+                this.getFromDb(DB);
+
+            }
         });
 
     }

@@ -1,30 +1,46 @@
-import {FlatList, Image, RefreshControl, SafeAreaView, Text, TouchableOpacity, View} from 'react-native';
+import {FlatList, Image, RefreshControl, SafeAreaView, Text, ToastAndroid, TouchableOpacity, View} from 'react-native';
 import styles from '../styles';
 import React, {useState, useEffect} from 'react';
-
+import NetInfo from '@react-native-community/netinfo';
+const _ = require('lodash');
 
 function RankScreen({navigation}) {
     const [refreshing, setRefreshing] = useState(false);
     const [rankScore, setRankScore] = useState([]);
 
     useEffect(() => {
-        fetch('http://tgryl.pl/quiz/' + 'results')
-            .then((response) => response.json())
-            .then((json) => setRankScore(json.reverse()))
-            .catch((error) => console.error(error));
-
+        NetInfo.fetch().then(state => {
+            if (state.isConnected == true) {
+                fetch('http://tgryl.pl/quiz/' + 'results')
+                    .then((response) => response.json())
+                    .then((json) => setRankScore(json.reverse()))
+                    .catch((error) => console.error(error));
+            } else {
+                ToastAndroid.showWithGravity('no network!', ToastAndroid.SHORT, ToastAndroid.TOP);
+            }
+        });
         return () => {
         };
     }, []);
 
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
+
         wait(100).then(() => {
-            fetch('http://tgryl.pl/quiz/' + 'results')
-                .then((response) => response.json())
-                .then((json) => setRankScore(json.reverse()))
-                .catch((error) => console.error(error));
-            setRefreshing(false);
+            NetInfo.fetch().then(state => {
+                if (state.isConnected == true) {
+
+                    fetch('http://tgryl.pl/quiz/' + 'results')
+                        .then((response) => response.json())
+                        .then((json) => setRankScore(json.reverse()))
+                        .catch((error) => console.error(error));
+                    setRefreshing(false);
+                    ToastAndroid.showWithGravity('Odswieżono!', ToastAndroid.SHORT, ToastAndroid.TOP);
+                } else {
+                    ToastAndroid.showWithGravity('No network!', ToastAndroid.SHORT, ToastAndroid.TOP);
+                    setRefreshing(false);
+                }
+            });
         });
     }, []);
 
